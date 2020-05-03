@@ -1,6 +1,5 @@
 #include "CommonHeader.h"
 #include "Point.h"
-
 //---------------------------------------------------------------------------
 // входные данные:
 const double	E = 10e-5;						// точность 
@@ -13,36 +12,6 @@ const double	R1 = 1.;						// меньший радиус
 const double	R2 = 3.;						// больший радиус
 double			hRksi = (R2 - R1) / N_ksi;		// шаг по радиусу вдоль кси
 double			hReta = (R2 - R1) / N_eta;		// шаг по радиусу вдоль эта
-
-
-//const double k0 = 0.2;
-//const double kN = 0.4;
-//const double x0 = 0.;
-//const double xN = 1.;
-//double xLow(double y)
-//{
-//	return (0.025 * sin(5 * PI * y));
-//}
-//double xUp(double y)
-//{
-//	return (1 + 0.05 * cos(5 * PI / 2 * y));
-//}
-//double yLow(double x)
-//{
-//	return (k0 + cos(PI * x));
-//}
-//double yUp(double x)
-//{
-//	return (1. + kN * sin(PI * x));
-//}
-//double l0 = (yUp(x0) - yLow(x0)) / N_eta;
-//double lN = (yUp(xN) - yLow(xN)) / N_eta;
-//double h0 = (xN - x0) / N_ksi;
-//double hN = h0;
-
-
-
-
 //---------------------------------------------------------------------------
 // сетки для итерационного процесса:
 Point netK[N_ksi + 1][N_eta + 1];				// сетка на k-м шаге
@@ -59,11 +28,6 @@ void initBorderValues()
 		netK[i][0].y = (R1 + hReta * i) * sin(PI / (2 * N_eta) * 0.);
 		netK[i][N_eta].y = (R1 + hReta * i) * sin(PI / (2 * N_eta) * N_eta);
 
-		/*netK[i][0].x = i * h0;
-		netK[i][N_eta].x = i * hN;
-		netK[i][0].y = yLow(netK[i][0].x);
-		netK[i][N_eta].y = yUp(netK[i][N_eta].x);*/
-
 		netK1[i][0].x = netK[i][0].x;
 		netK1[i][N_eta].x = netK[i][N_eta].x;
 		netK1[i][0].y = netK[i][0].y;
@@ -75,14 +39,7 @@ void initBorderValues()
 		netK[N_ksi][j].x = (R1 + hRksi * N_ksi) * cos(PI / (2 * N_ksi) * j);
 		netK[0][j].y = (R1 + hRksi * 0.) * sin(PI / (2 * N_ksi) * j);
 		netK[N_ksi][j].y = (R1 + hRksi * N_ksi) * sin(PI / (2 * N_ksi) * j);
-
-		/*netK[0][j].y = yLow(x0) + j * l0;
-		netK[N_ksi][j].y = yLow(xN) + j * lN;
-
-		netK[0][j].x = xLow(netK[0][j].y); 
-		netK[N_ksi][j].x = xUp(netK[N_ksi][j].y);*/
 		
-
 		netK1[0][j].y = netK[0][j].y;
 		netK1[N_ksi][j].y = netK[N_ksi][j].y;
 		netK1[0][j].x = netK[0][j].x;
@@ -111,13 +68,13 @@ void initBorderValues()
 			netK[i][N_eta].fi = 2 / h_ksi * (2 * netK[i][N_eta].x 
 				- netK[i + 1][N_eta].x - netK[i - 1][N_eta].x) 
 				/ (netK[i + 1][N_eta].x - netK[i - 1][N_eta].x);
-		}
+		}		
 		netK1[i][0].fi = netK[i][0].fi;
 		netK1[i][N_eta].fi = netK[i][N_eta].fi;
 	}
 
 	// пси на границе:
-	for (int j = 0; j <= N_eta - 1; j++)
+	for (int j = 1; j <= N_eta - 1; j++)
 	{
 		if (netK[0][j + 1].y == netK[0][j - 1].y)
 		{
@@ -175,16 +132,7 @@ void GetInnerValues()
 					* (netK[i][N_eta].fi - netK[i][0].fi))
 					/ (netK[N_ksi][j].x - netK[0][j].x) + netK[i][N_eta].fi;
 			}
-			//---
-			if (netK[N_ksi][j].y == netK[0][j].y)
-			{
-				netK[i][j].fi = 0;
-			}
-			else
-			{
-				netK[i][j].fi = ((netK[i][j].y - netK[N_ksi][j].y) * (netK[i][N_eta].fi - netK[i][0].fi)) / (netK[N_ksi][j].y - netK[0][j].y) + netK[i][N_eta].fi;
-			}
-			//---
+			
 			// пси:
 			if (netK[i][N_eta].y == netK[i][0].y)
 			{
@@ -196,16 +144,6 @@ void GetInnerValues()
 					* (netK[N_ksi][j].psi - netK[0][j].psi)) 
 					/ (netK[i][N_eta].y - netK[i][0].y) + netK[N_ksi][j].psi;
 			}
-			//---
-			if (netK[i][N_eta].x == netK[i][0].x)
-			{
-				netK[i][j].psi = 0;
-			}
-			else
-			{
-				netK[i][j].psi = ((netK[i][j].x - netK[i][N_eta].x) * (netK[N_ksi][j].psi - netK[0][j].psi)) / (netK[i][N_eta].x - netK[i][0].x) + netK[N_ksi][j].psi;
-			}
-			//---
 		}
 	}
 }
@@ -220,9 +158,9 @@ void printNet()
 	{
 		for (int j = 0; j <= N_eta; j++)
 		{
-			out << "{" << netK[i][j].x << ", " << netK[i][j].y << "}, ";
+			out << "(" << netK[i][j].x << ", " << netK[i][j].y << ")  ";
 		}
-		//out << "\n";
+		out << "\n";
 	}
 	out.close();
 }
@@ -242,7 +180,7 @@ void printNetForGraph()
 		out << "{" << netK[N_ksi][j].x << ", " << netK[N_ksi][j].y << "} ";
 		out << "}, ";
 	}
-	for (int i = 0; i <= N_ksi; i++)
+	for (int i = 0; i < N_ksi; i++)
 	{
 		out << "{";
 		for (int j = 0; j < N_eta; j++)
@@ -330,7 +268,6 @@ int main()
 	printNetForGraph();
 
 	cout << nOfIter << endl;
-
 
 	return 0;
 }
