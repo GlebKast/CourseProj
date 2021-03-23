@@ -3,14 +3,17 @@
 //---------------------------------------------------------------------------
 // входные данные:
 const double	E = 10e-5;						// точность 
-const double	PI = 3.14159265358979323846;		
-const int		N_ksi = 4;						// число разбиений по оси кси
-const int		N_eta = 2;						// число разбиений по оси эта
+const double	PI = 3.14159265358979323846;	// число Пи	
+const int		N_ksi = 30;						// число разбиений по оси кси
+const int		N_eta = 40;						// число разбиений по оси эта
 double			h_ksi = 1. / N_ksi;				// шаг по оси кси
-double			h_eta = 1. / N_eta;				// шаг по оси кси
-const double	R1 = 1.;						// меньший радиус
-const double	R2 = 3.;						// больший радиус
-double			hRksi = (R2 - R1) / N_ksi;		// шаг по радиусу вдоль кси
+double			h_eta = 1. / N_eta;				// шаг по оси эта
+const double	R1_1 = 1.;						// меньший радиус по кси
+const double	R1_2 = 3.;						// больший радиус по кси
+const double	R2_1 = 3.;						// меньший радиус по эта
+const double	R2_2 = 6.;						// больший радиус по эта
+double			hRksi_1 = (R1_2 - R1_1) / N_ksi;		// шаг по радиусу вдоль кси
+double			hRksi_2 = (R2_2 - R1_2) / N_eta;		// шаг по радиусу вдоль эта
 
 //---------------------------------------------------------------------------
 // сетки для итерационного процесса:
@@ -23,10 +26,10 @@ void initBorderValues()
 	// граничные точки сетки:
 	for (int i = 0; i <= N_ksi; i++)
 	{
-		netK[i][0].x = (R1 + hRksi * i) * cos(PI / (2 * N_eta) * 0.);
-		netK[i][N_eta].x = (R1 + hRksi * i) * cos(PI / (2 * N_eta) * N_eta);
-		netK[i][0].y = (R1 + hRksi * i) * sin(PI / (2 * N_eta) * 0.);
-		netK[i][N_eta].y = (R1 + hRksi * i) * sin(PI / (2 * N_eta) * N_eta);
+		netK[i][0].x = (R1_1 + hRksi_1 * i) * cos(PI / (2 * N_eta) * 0.);
+		netK[i][N_eta].x = (R1_1 + hRksi_1 * i) * cos(PI / (2 * N_eta) * N_eta);
+		netK[i][0].y = (R2_1 + hRksi_2 * i) * sin(PI / (2 * N_eta) * 0.);
+		netK[i][N_eta].y = (R2_1 + hRksi_2 * i) * sin(PI / (2 * N_eta) * N_eta);
 
 		netK1[i][0].x = netK[i][0].x;
 		netK1[i][N_eta].x = netK[i][N_eta].x;
@@ -35,10 +38,10 @@ void initBorderValues()
 	}
 	for (int j = 0; j <= N_eta; j++)
 	{
-		netK[0][j].x = (R1 + hRksi * 0.) * cos(PI / (2 * N_eta) * j);
-		netK[N_ksi][j].x = (R1 + hRksi * N_ksi) * cos(PI / (2 * N_eta) * j);
-		netK[0][j].y = (R1 + hRksi * 0.) * sin(PI / (2 * N_eta) * j);
-		netK[N_ksi][j].y = (R1 + hRksi * N_ksi) * sin(PI / (2 * N_eta) * j);
+		netK[0][j].x = (R1_1 + hRksi_1 * 0.) * cos(PI / (2 * N_eta) * j);
+		netK[N_ksi][j].x = (R1_1 + hRksi_1 * N_ksi) * cos(PI / (2 * N_eta) * j);
+		netK[0][j].y = (R2_1 + hRksi_2 * 0.) * sin(PI / (2 * N_eta) * j);
+		netK[N_ksi][j].y = (R2_1 + hRksi_2 * N_ksi) * sin(PI / (2 * N_eta) * j);
 		
 		netK1[0][j].y = netK[0][j].y;
 		netK1[N_ksi][j].y = netK[N_ksi][j].y;
